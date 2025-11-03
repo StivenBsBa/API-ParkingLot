@@ -1,0 +1,33 @@
+{
+  "name": "apiparqueadero",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "API REST creada con Express para realizar un CRUD de registro de placas y tiempos en un parqueadero que solo acepta motos y carros. Los carros tienen un límite de 5 cupos y las motos 10.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "API",
+    "Express",
+    "CRUD",
+    "Parqueadero",
+    "Motos",
+    "Carros"
+  ],
+  "author": "Brayan Barajas",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

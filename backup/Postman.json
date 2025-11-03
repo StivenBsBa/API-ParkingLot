@@ -1,0 +1,424 @@
+{
+	"info": {
+		"_postman_id": "5e4f0aff-7590-4426-b71e-1ccea27bbfe9",
+		"name": "Api Parqueadero",
+		"description": "Esta API permite registrar, listar, actualizar y eliminar vehículos en un parqueadero. Los vehículos pueden ser de tipo \"Carro\" o \"Moto\". El parqueadero tiene un límite de 5 cupos para carros y 10 para motos.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40154105"
+	},
+	"item": [
+		{
+			"name": "ListarVehiculos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"list"
+					]
+				},
+				"description": "Obtiene la lista de vehículos tanto activos o inactivos"
+			},
+			"response": []
+		},
+		{
+			"name": "ListarVehiculosActivo",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/list?status=active",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"list"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "active"
+						}
+					]
+				},
+				"description": "Obtiene la lista de vehículos activos"
+			},
+			"response": []
+		},
+		{
+			"name": "ListarVehiculosInactivos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/list?status=inactive",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"list"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "inactive"
+						}
+					]
+				},
+				"description": "Obtiene la lista de vehículos Inactivos"
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerVehículoplaca",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/oneVehicles/abc123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"oneVehicles",
+						"abc123"
+					]
+				},
+				"description": "Consulta un vehículo específico por su placa."
+			},
+			"response": []
+		},
+		{
+			"name": "TotalHorasVehículoEspecífico",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/vehicle-hours/abc123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"vehicle-hours",
+						"abc123"
+					]
+				},
+				"description": "Obtiene el total de horas de estacionamiento de un vehículo específico mediante su placa."
+			},
+			"response": []
+		},
+		{
+			"name": "TotalHorasPorVehiculo",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/all-vehicles-hours",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"all-vehicles-hours"
+					]
+				},
+				"description": "Obtiene el total de horas de estacionamiento de todos los vehículos."
+			},
+			"response": []
+		},
+		{
+			"name": "TotalHoras",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/total-hours",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"total-hours"
+					]
+				},
+				"description": "Muestra el total de horas de estacionamiento acumuladas en el sistemaespecífico"
+			},
+			"response": []
+		},
+		{
+			"name": "CantidadVehiculos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/stats",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"stats"
+					]
+				},
+				"description": "Obtiene las estadísticas de los vehículos en el parqueadero, incluyendo el total de vehículos, vehículos activos, vehículos inactivos, motos activas, motos inactivas, carros activos y carros inactivos."
+			},
+			"response": []
+		},
+		{
+			"name": "RegistrarVehículo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"plate\": \"ABC123\", // Placa del vehículo\r\n  \"vehicleType\": \"Carro\", // Tipo del vehículo (\"Carro\" o \"Moto\")\r\n  \"entryTime\": \"2024-12-05T10:30:00Z\", // Fecha y hora de entrada\r\n  \"exitTime\": null, // Fecha y hora de salida (por defecto es null al ingresar)\r\n  \"status\": \"active\" // Estado del vehículo (activo por defecto)\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/vehicleEntry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"vehicleEntry"
+					]
+				},
+				"description": "Registra un nuevo vehículo en el sistema."
+			},
+			"response": []
+		},
+		{
+			"name": "ReentradaVehículo",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/reenter/abc123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"reenter",
+						"abc123"
+					]
+				},
+				"description": "Permite reingresar un vehículo al estacionamiento tras haber salido."
+			},
+			"response": []
+		},
+		{
+			"name": "SalidaVehículo",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/exit/ABVAA14",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"exit",
+						"ABVAA14"
+					]
+				},
+				"description": "Registra la salida de un vehículo del estacionamiento."
+			},
+			"response": []
+		},
+		{
+			"name": "EliminarVehículo",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/vehicles/delete/abc123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"vehicles",
+						"delete",
+						"abc123"
+					]
+				},
+				"description": "Eliminar un vehículo del registro a partir de su placa"
+			},
+			"response": []
+		}
+	]
+}
