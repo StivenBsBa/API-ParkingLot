@@ -1,36 +1,45 @@
-import { Vehicle, Dueño } from "../models/vehicleModels.js";
+import { Vehicle, Dueño } from "../models/index.js";
 import { ResponseMessages } from "../constants/responseMessages.js";
 
-const CAR_LIMIT = 10; // Límite de carros
-const MOTORCYCLE_LIMIT = 20; // Límite de motos
+const CAR_LIMIT = 50; // Límite de carros
+const MOTORCYCLE_LIMIT = 100; // Límite de motos
 
-export const vehicleEntry = async (req, res) => {
+export const vehicleEntry = async (req, res, next) => {
   try {
-    const { vehicleType, entryTime, exitTime, status, Cedula, Nombre } =
-      req.body;
+    const { vehicleType, entryTime, exitTime, status } = req.body;
+    let { Cedula, Nombre } = req.body;
     const { formattedPlate } = req;
+
+    // Si no se proporcionan los datos del dueño, se asignan valores por defecto
+    if (!Cedula || !Nombre) {
+      Cedula = "1111111";
+      Nombre = "invitado";
+    }
 
     // Verificar si el vehículo ya está registrado y activo
     const existingVehicle = await Vehicle.findOne({
-      where: { plate: formattedPlate, status: 'active' },
+      where: { plate: formattedPlate, status: "active" },
     });
     if (existingVehicle) {
-      return res
-        .status(ResponseMessages.VEHICLE_ALREADY_REGISTERED.status)
-        .json(ResponseMessages.VEHICLE_ALREADY_REGISTERED);
+      const error = new Error(ResponseMessages.VEHICLE_ALREADY_REGISTERED.message);
+      error.statusCode = ResponseMessages.VEHICLE_ALREADY_REGISTERED.status;
+      error.responseMessage = ResponseMessages.VEHICLE_ALREADY_REGISTERED;
+      return next(error);
     }
 
     // Validar fechas si son proporcionadas
     const validateDate = (date) => isNaN(new Date(date).getTime());
     if (entryTime && validateDate(entryTime)) {
-      return res
-        .status(ResponseMessages.INVALID_DATE_FORMAT.status)
-        .json(ResponseMessages.INVALID_DATE_FORMAT);
+      const error = new Error(ResponseMessages.INVALID_DATE_FORMAT.message);
+      error.statusCode = ResponseMessages.INVALID_DATE_FORMAT.status;
+      error.responseMessage = ResponseMessages.INVALID_DATE_FORMAT;
+      return next(error);
     }
     if (exitTime && validateDate(exitTime)) {
-      return res
-        .status(ResponseMessages.INVALID_DATE_FORMAT.status)
-        .json(ResponseMessages.INVALID_DATE_FORMAT);
+      const error = new Error(ResponseMessages.INVALID_DATE_FORMAT.message);
+      error.statusCode = ResponseMessages.INVALID_DATE_FORMAT.status;
+      error.responseMessage = ResponseMessages.INVALID_DATE_FORMAT;
+      return next(error);
     }
 
     // Verificar disponibilidad según el tipo de vehículo
@@ -40,25 +49,23 @@ export const vehicleEntry = async (req, res) => {
     });
 
     if (limits[vehicleType] === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: "Tipo de vehículo inválido debe ser Carro o Moto.",
-      });
+      const error = new Error("Tipo de vehículo inválido debe ser Carro o Moto.");
+      error.statusCode = 400;
+      return next(error);
     }
 
     if (activeVehicles >= limits[vehicleType]) {
-      return res.status(400).json({
-        success: false,
-        message: `No hay espacio para más ${
-          vehicleType === "Carro" ? "carros" : "motos"
-        }.`,
-      });
+      const error = new Error(`No hay espacio para más ${
+        vehicleType === "Carro" ? "carros" : "motos"
+      }.`);
+      error.statusCode = 400;
+      return next(error);
     }
 
     // Encontrar o crear el Dueño
     const [owner, created] = await Dueño.findOrCreate({
-        where: { Cedula },
-        defaults: { Nombre }
+      where: { Cedula },
+      defaults: { Nombre },
     });
 
     // Registrar el nuevo vehículo
@@ -76,10 +83,6 @@ export const vehicleEntry = async (req, res) => {
       vehicle: newVehicle,
     });
   } catch (error) {
-    console.error("Error al registrar vehículo:", error);
-    return res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message,
-    });
+    return next(error);
   }
 };

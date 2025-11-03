@@ -1,23 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-// Modelo para Dueños
-const Dueño = sequelize.define('Dueño', {
-  Cedula: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    allowNull: false,
-    unique: true,
-  },
-  Nombre: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-}, {
-  timestamps: false
-});
-
-// Modelo para Vehículos
 const Vehicle = sequelize.define('Vehicle', {
   plate: {
     type: DataTypes.STRING,
@@ -49,8 +32,4 @@ const Vehicle = sequelize.define('Vehicle', {
   timestamps: false
 });
 
-// Definir la relación
-Vehicle.belongsTo(Dueño, { foreignKey: 'ownerCedula' });
-Dueño.hasMany(Vehicle, { foreignKey: 'ownerCedula' });
-
-export { Vehicle, Dueño };
+export default Vehicle;

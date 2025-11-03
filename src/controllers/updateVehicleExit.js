@@ -1,7 +1,7 @@
-import { Vehicle } from "../models/vehicleModels.js";
+import { Vehicle } from "../models/index.js";
 import { ResponseMessages } from "../constants/responseMessages.js";
 
-export const updateVehicleExit = async (req, res) => {
+export const updateVehicleExit = async (req, res, next) => {
   try {
     const { formattedPlate } = req;
 
@@ -9,15 +9,15 @@ export const updateVehicleExit = async (req, res) => {
     const vehicle = await Vehicle.findOne({ where: { plate: formattedPlate } });
 
     if (!vehicle) {
-      return res
-        .status(ResponseMessages.VEHICLE_NOT_FOUND.status)
-        .json(ResponseMessages.VEHICLE_NOT_FOUND);
+      const error = new Error(ResponseMessages.VEHICLE_NOT_FOUND.message);
+      error.statusCode = ResponseMessages.VEHICLE_NOT_FOUND.status;
+      error.responseMessage = ResponseMessages.VEHICLE_NOT_FOUND;
+      return next(error);
     }
     if (vehicle.status === "inactive") {
-      return res.status(400).json({
-        success: false,
-        message: `El vehículo con placa ${formattedPlate} ya ha salido.`,
-      });
+      const error = new Error(`El vehículo con placa ${formattedPlate} ya ha salido.`);
+      error.statusCode = 400;
+      return next(error);
     }
 
     // Calcular el tiempo de parqueo y aproximarlo hacia arriba
@@ -44,11 +44,6 @@ export const updateVehicleExit = async (req, res) => {
       } en el parqueadero. El tiempo total acumulado es de ${totalTimeMessage}.`,
     });
   } catch (error) {
-    console.error("Error al actualizar la salida del vehículo:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al procesar la salida del vehículo.",
-      error: error.message,
-    });
+    next(error);
   }
 };

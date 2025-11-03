@@ -1,6 +1,6 @@
-import { Vehicle } from "../models/vehicleModels.js";
+import { Vehicle } from "../models/index.js";
 
-export const deleteVehicleRecord = async (req, res) => {
+export const deleteVehicleRecord = async (req, res, next) => {
   try {
     const { formattedPlate } = req;
 
@@ -10,11 +10,9 @@ export const deleteVehicleRecord = async (req, res) => {
     });
 
     if (!vehicle) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "El vehículo no existe, está activo o ya fue eliminado. Verifique el estado del vehículo.",
-      });
+      const error = new Error("El vehículo no existe, está activo o ya fue eliminado. Verifique el estado del vehículo.");
+      error.statusCode = 400;
+      return next(error);
     }
 
     // Si se encuentra, eliminarlo
@@ -25,11 +23,6 @@ export const deleteVehicleRecord = async (req, res) => {
       message: `El vehículo con placa ${vehicle.plate} de tipo ${vehicle.vehicleType} fue eliminado exitosamente.`,
     });
   } catch (error) {
-    console.error("Error al eliminar el registro del vehículo:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar el registro del vehículo.",
-      error: error.message,
-    });
+    next(error);
   }
 };

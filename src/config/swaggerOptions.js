@@ -16,7 +16,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./src/config/swaggerDocs.js"],
+  apis: ["./src/docs/*.js"],
 };
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);

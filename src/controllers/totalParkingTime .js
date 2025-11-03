@@ -1,13 +1,9 @@
-import { Vehicle } from "../models/vehicleModels.js";
+import { Vehicle } from "../models/index.js";
 import { ResponseMessages } from "../constants/responseMessages.js";
-
-const formatTotalTime = (totalTime) => {
-  const totalTimeInHours = Math.floor(totalTime || 0);
-  return `${totalTimeInHours} ${totalTimeInHours === 1 ? 'hora' : 'horas'}`;
-};
+import { formatTotalTime } from "../utils/time.js";
 
 // 1. Obtener las horas de parqueo de un vehículo específico
-export const getVehicleTotalPlate = async (req, res) => {
+export const getVehicleTotalPlate = async (req, res, next) => {
   try {
     const { formattedPlate } = req;
 
@@ -16,9 +12,10 @@ export const getVehicleTotalPlate = async (req, res) => {
     });
 
     if (!vehicle) {
-      return res.status(ResponseMessages.VEHICLE_NOT_FOUND.status).json({
-        ...ResponseMessages.VEHICLE_NOT_FOUND,
-      });
+      const error = new Error(ResponseMessages.VEHICLE_NOT_FOUND.message);
+      error.statusCode = ResponseMessages.VEHICLE_NOT_FOUND.status;
+      error.responseMessage = ResponseMessages.VEHICLE_NOT_FOUND;
+      return next(error);
     }
 
     res.status(200).json({
@@ -31,23 +28,19 @@ export const getVehicleTotalPlate = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 2. Obtener las horas de parqueo de todos los vehículos
-export const getVehicleTotalHours = async (req, res) => {
+export const getVehicleTotalHours = async (req, res, next) => {
   try {
     const vehicles = await Vehicle.findAll();
 
     if (!vehicles || vehicles.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron vehículos en el parqueadero",
-      });
+      const error = new Error("No se encontraron vehículos en el parqueadero");
+      error.statusCode = 404;
+      return next(error);
     }
 
     const vehiclesTotalTime = vehicles.map((vehicle) => ({
@@ -62,23 +55,19 @@ export const getVehicleTotalHours = async (req, res) => {
       vehicles: vehiclesTotalTime,
     });
   } catch (error) {
-    res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message,
-    });
+    next(error);
   }
 };
 
 // 3. Obtener el total de horas de todos los vehículos en el parqueadero (Optimizado)
-export const getTotalHours = async (req, res) => {
+export const getTotalHours = async (req, res, next) => {
   try {
     const totalHours = await Vehicle.sum('totalTime');
 
     if (totalHours === null) {
-        return res.status(404).json({
-            success: false,
-            message: "No hay registros de tiempo para calcular.",
-          });
+        const error = new Error("No hay registros de tiempo para calcular.");
+        error.statusCode = 404;
+        return next(error);
     }
 
     const formattedTime = formatTotalTime(totalHours);
@@ -89,9 +78,6 @@ export const getTotalHours = async (req, res) => {
       totalHours: formattedTime,
     });
   } catch (error) {
-    res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message,
-    });
+    next(error);
   }
 };

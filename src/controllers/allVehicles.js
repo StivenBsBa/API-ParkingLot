@@ -1,46 +1,48 @@
-import { Vehicle, Dueño } from "../models/vehicleModels.js";
+import { Vehicle, Dueño } from "../models/index.js";
 import { ResponseMessages } from "../constants/responseMessages.js";
+import sequelize from "../config/database.js";
 
 // Función para obtener un solo vehículo por placa
-export const oneVehicle = async (req, res) => {
+export const oneVehicle = async (req, res, next) => {
   try {
     const { formattedPlate } = req;
 
     const vehicle = await Vehicle.findOne({
       where: { plate: formattedPlate },
-      include: [{ model: Dueño, attributes: ['Nombre'] }], // Incluir el nombre del dueño
+      include: [{ model: Dueño }], // Incluir el objeto Dueño completo
       attributes: { exclude: ['ownerCedula'] } // Excluir la clave foránea
     });
 
     if (!vehicle) {
-      return res.status(ResponseMessages.VEHICLE_NOT_FOUND.status).json({
-        ...ResponseMessages.VEHICLE_NOT_FOUND,
-      });
+      const error = new Error(ResponseMessages.VEHICLE_NOT_FOUND.message);
+      error.statusCode = ResponseMessages.VEHICLE_NOT_FOUND.status;
+      error.responseMessage = ResponseMessages.VEHICLE_NOT_FOUND;
+      return next(error);
     }
 
     res.status(200).json({ success: true, data: vehicle });
   } catch (error) {
-    res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // Función para listar vehículos por estado (activo/inactivo)
-export const listVehiclesByStatus = async (req, res) => {
+export const listVehiclesByStatus = async (req, res, next) => {
   try {
     const { status } = req.query;
 
     if (status && !["active", "inactive"].includes(status)) {
-      return res.status(ResponseMessages.INVALID_STATUS_VALUE.status).json(ResponseMessages.INVALID_STATUS_VALUE);
+      const error = new Error(ResponseMessages.INVALID_STATUS_VALUE.message);
+      error.statusCode = ResponseMessages.INVALID_STATUS_VALUE.status;
+      error.responseMessage = ResponseMessages.INVALID_STATUS_VALUE;
+      return next(error);
     }
 
     const query = status ? { status } : {};
 
     const vehicles = await Vehicle.findAll({
         where: query,
-        include: [{ model: Dueño, attributes: ['Nombre'] }],
+        include: [{ model: Dueño }],
         attributes: { exclude: ['ownerCedula'] }
     });
 
@@ -58,15 +60,12 @@ export const listVehiclesByStatus = async (req, res) => {
       vehicles,
     });
   } catch (error) {
-    res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message
-    });
+    next(error);
   }
 };
 
 // Función para listar vehículos por cédula de dueño
-export const oneCedula = async (req, res) => {
+export const oneCedula = async (req, res, next) => {
     try {
       const { Cedula } = req.params;
   
@@ -78,9 +77,9 @@ export const oneCedula = async (req, res) => {
       });
 
       if (!dueño) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Dueño no encontrado" });
+        const error = new Error("Dueño no encontrado");
+        error.statusCode = 404;
+        return next(error);
       }
   
       return res.status(200).json({
@@ -89,27 +88,40 @@ export const oneCedula = async (req, res) => {
         dueño: dueño,
       });
     } catch (error) {
-      console.error("Error al obtener los vehículos:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Error del servidor",
-        error: error.message,
-      });
+      next(error);
     }
   };
 
 // Función para obtener las estadísticas de los vehículos
-export const getVehicleStats = async (req, res) => {
+export const getVehicleStats = async (req, res, next) => {
   try {
-    const countWhere = (where) => Vehicle.count({ where });
+    const stats = await Vehicle.findAll({
+      attributes: [
+        'status',
+        'vehicleType',
+        [sequelize.fn('COUNT', sequelize.col('plate')), 'count']
+      ],
+      group: ['status', 'vehicleType'],
+      raw: true
+    });
 
-    const totalVehicles = await Vehicle.count();
-    const totalActiveVehicles = await countWhere({ status: "active" });
-    const totalInactiveVehicles = await countWhere({ status: "inactive" });
-    const totalActiveMotos = await countWhere({ vehicleType: "Moto", status: "active" });
-    const totalInactiveMotos = await countWhere({ vehicleType: "Moto", status: "inactive" });
-    const totalActiveCarros = await countWhere({ vehicleType: "Carro", status: "active" });
-    const totalInactiveCarros = await countWhere({ vehicleType: "Carro", status: "inactive" });
+    const formattedStats = stats.reduce((acc, stat) => {
+      const { status, vehicleType, count } = stat;
+      if (!acc[status]) {
+        acc[status] = {};
+      }
+      acc[status][vehicleType] = count;
+      return acc;
+    }, {});
+
+    const activeMotos = formattedStats.active?.Moto || 0;
+    const inactiveMotos = formattedStats.inactive?.Moto || 0;
+    const activeCarros = formattedStats.active?.Carro || 0;
+    const inactiveCarros = formattedStats.inactive?.Carro || 0;
+
+    const totalVehicles = activeMotos + inactiveMotos + activeCarros + inactiveCarros;
+    const totalActiveVehicles = activeMotos + activeCarros;
+    const totalInactiveVehicles = inactiveMotos + inactiveCarros;
 
     return res.status(200).json({
       success: true,
@@ -118,16 +130,13 @@ export const getVehicleStats = async (req, res) => {
         "total de Vehículos": totalVehicles,
         "total de Vehículos activos": totalActiveVehicles,
         "total de Vehículos Inactivos": totalInactiveVehicles,
-        "total de Motos Activas": totalActiveMotos,
-        "total de Motos Inactivas": totalInactiveMotos,
-        "total de Carros Activos": totalActiveCarros,
-        "total de Carros Inactivos": totalInactiveCarros,
+        "total de Motos Activas": activeMotos,
+        "total de Motos Inactivas": inactiveMotos,
+        "total de Carros Activos": activeCarros,
+        "total de Carros Inactivos": inactiveCarros,
       },
     });
   } catch (error) {
-    return res.status(ResponseMessages.SERVER_ERROR.status).json({
-      ...ResponseMessages.SERVER_ERROR,
-      error: error.message
-    });
+    next(error);
   }
 };

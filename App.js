@@ -3,6 +3,7 @@ import cors from "cors";
 import connectToDatabase from "./src/config/dbConnection.js";
 import router from "./src/Routes/vehicleRoutes.js";
 import { swaggerUi, swaggerDocs } from "./src/config/swaggerOptions.js";
+import errorHandler from "./src/middleware/errorHandler.js";
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use("/api/vehicles", router);
 
 // Configuración de Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Manejo de errores centralizado
+app.use(errorHandler);
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
