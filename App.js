@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import connectToDatabase from "./src/config/dbConnection.js";
 import router from "./src/Routes/vehicleRoutes.js";
+import ownerRouter from "./src/Routes/ownerRoutes.js";
+import authRouter from "./src/Routes/authRoutes.js";
 import { swaggerUi, swaggerDocs } from "./src/config/swaggerOptions.js";
 import errorHandler from "./src/middleware/errorHandler.js";
 
@@ -16,7 +18,9 @@ app.use(cors());
 connectToDatabase();
 
 // Rutas de la API
+app.use("/api/auth", authRouter);
 app.use("/api/vehicles", router);
+app.use("/api/owners", ownerRouter);
 
 // Configuración de Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));

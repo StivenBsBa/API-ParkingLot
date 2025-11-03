@@ -26,19 +26,30 @@ export const oneVehicle = async (req, res, next) => {
   }
 };
 
-// Función para listar vehículos por estado (activo/inactivo)
-export const listVehiclesByStatus = async (req, res, next) => {
+// Función para listar vehículos con filtros
+export const listVehicles = async (req, res, next) => {
   try {
-    const { status } = req.query;
+    const { status, vehicleType } = req.query;
+    const query = {};
 
-    if (status && !["active", "inactive"].includes(status)) {
-      const error = new Error(ResponseMessages.INVALID_STATUS_VALUE.message);
-      error.statusCode = ResponseMessages.INVALID_STATUS_VALUE.status;
-      error.responseMessage = ResponseMessages.INVALID_STATUS_VALUE;
-      return next(error);
+    if (status) {
+      if (!["active", "inactive"].includes(status)) {
+        const error = new Error(ResponseMessages.INVALID_STATUS_VALUE.message);
+        error.statusCode = ResponseMessages.INVALID_STATUS_VALUE.status;
+        error.responseMessage = ResponseMessages.INVALID_STATUS_VALUE;
+        return next(error);
+      }
+      query.status = status;
     }
 
-    const query = status ? { status } : {};
+    if (vehicleType) {
+      if (!["Carro", "Moto"].includes(vehicleType)) {
+        const error = new Error("Tipo de vehículo inválido. Debe ser Carro o Moto.");
+        error.statusCode = 400;
+        return next(error);
+      }
+      query.vehicleType = vehicleType;
+    }
 
     const vehicles = await Vehicle.findAll({
         where: query,
@@ -49,15 +60,34 @@ export const listVehiclesByStatus = async (req, res, next) => {
     if (vehicles.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `No se encontraron vehículos con estado ${
-          status || "cualquiera"
-        }`,
+        message: "No se encontraron vehículos con los filtros especificados.",
       });
     }
 
     res.status(ResponseMessages.VEHICLE_LIST_SUCCESS.status).json({
       ...ResponseMessages.VEHICLE_LIST_SUCCESS,
       vehicles,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Función para listar todos los dueños
+export const listOwners = async (req, res, next) => {
+  try {
+    const owners = await Dueño.findAll();
+
+    if (owners.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontraron dueños registrados.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: owners,
     });
   } catch (error) {
     next(error);

@@ -2,10 +2,11 @@ import express from "express";
 import { vehicleEntry } from "../controllers/vehicleEntry.js";
 import { deleteVehicleRecord } from "../controllers/deleteVehicleRecord.js";
 import {
-  listVehiclesByStatus,
+  listVehicles,
   oneVehicle,
   getVehicleStats,
   oneCedula,
+  listOwners,
 } from "../controllers/allVehicles.js";
 import { updateVehicleExit } from "../controllers/updateVehicleExit.js";
 import {
@@ -18,18 +19,19 @@ import {
   validateVehicleEntry,
   validateOwner,
 } from "../middleware/validators/vehicleValidator.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", listVehiclesByStatus);
-router.get("/stats", getVehicleStats);
-router.get("/hours", getVehicleTotalHours);
-router.get("/hours/total", getTotalHours);
-router.get("/:plate", validatePlate, oneVehicle);
-router.get("/:plate/hours", validatePlate, getVehicleTotalPlate);
-router.put("/:plate/exit", validatePlate, updateVehicleExit);
-router.delete("/:plate", validatePlate, deleteVehicleRecord);
-router.post("/", validateVehicleEntry, vehicleEntry);
-router.get("/owner/:Cedula", validateOwner, oneCedula);
+router.get("/", authMiddleware, listVehicles);
+router.get("/stats", authMiddleware, getVehicleStats);
+router.get("/hours", authMiddleware, getVehicleTotalHours);
+router.get("/hours/total", authMiddleware, getTotalHours);
+router.get("/:plate", authMiddleware, validatePlate, oneVehicle);
+router.get("/:plate/hours", authMiddleware, validatePlate, getVehicleTotalPlate);
+router.put("/:plate/exit", authMiddleware, validatePlate, updateVehicleExit);
+router.delete("/:plate", authMiddleware, validatePlate, deleteVehicleRecord);
+router.post("/", authMiddleware, validateVehicleEntry, vehicleEntry);
+router.get("/owner/:Cedula", authMiddleware, validateOwner, oneCedula);
 
 export default router;
