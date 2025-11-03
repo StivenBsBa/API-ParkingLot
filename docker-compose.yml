@@ -6,13 +6,11 @@ services:
     container_name: mysql_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: yourstrongpassword  # CAMBIA ESTA CONTRASEÑA
+      MYSQL_ROOT_PASSWORD: yourstrongpassword
       MYSQL_DATABASE: parqueadero
     ports:
-      # Exponer el puerto de MySQL al host (opcional, útil para depuración)
       - '3307:3306'
     volumes:
-      # Persistir los datos de la base de datos
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
@@ -29,12 +27,25 @@ services:
     environment:
       DB_HOST: db
       DB_USER: root
-      DB_PASSWORD: yourstrongpassword # DEBE SER LA MISMA CONTRASEÑA DE ARRIBA
+      DB_PASSWORD: yourstrongpassword
       DB_NAME: parqueadero
       PORT: 3000
     depends_on:
       db:
         condition: service_healthy
+    expose:
+      - "3000"
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare_tunnel
+    restart: always
+    depends_on:
+      - api
+    command: tunnel --no-autoupdate --url http://api:3000
+    # opcional: guardar logs
+    volumes:
+      - ./cloudflare:/etc/cloudflared
 
 volumes:
   db_data:
